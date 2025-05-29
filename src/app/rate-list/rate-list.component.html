@@ -1,0 +1,45 @@
+<section class="card">
+    <header class="card-header">
+        <div class="card-actions">
+            <a href="#" class="card-action card-action-toggle" data-card-toggle></a>
+        </div>
+        <h2 class="card-title">Tarifas de Préstamo</h2>
+    </header>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="mb-3">
+                    <button id="addToTable" (click)="addRate()" class="btn btn-primary">Nueva Tarifa <i class="fas fa-plus"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <table class="table table-bordered table-striped mb-0" id="datatable-editable">
+            <thead>
+                <tr>
+                    <th>Descripción</th>
+                    <th>Precio Por Día</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let rate of rates">
+                    <td>
+                        <div *ngIf="!rate.editing">{{rate.description}}</div>
+                        <input *ngIf="rate.editing" [(ngModel)]="rate.description" class="form-control"/>
+                    </td>
+                    <td>
+                        <div *ngIf="!rate.editing">{{rate.value | currency}}</div>
+                        <input *ngIf="rate.editing" [(ngModel)]="rate.value" class="form-control" type="number"/>
+                    </td>
+                    <td class="actions">
+                        <a *ngIf="rate.editing" class="save-row" (click)="saveRate(rate)"><i class="fas fa-save"></i></a>
+                        <a *ngIf="rate.editing" class="cancel-row" (click)="cancelEdit(rate)"><i class="fas fa-times"></i></a>
+                        <a *ngIf="!rate.editing" class="on-default edit-row" (click)="editRate(rate)"><i class="fas fa-pencil-alt"></i></a>
+                        <a *ngIf="!rate.editing" class="on-default remove-row" (click)="removeRate(rate)"><i class="far fa-trash-alt"></i></a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>

@@ -1,0 +1,46 @@
+<section class="card">
+    <header class="card-header">
+        <div class="card-actions">
+            <a href="#" class="card-action card-action-toggle" data-card-toggle></a>
+        </div>
+        <h2 class="card-title">Editoriales</h2>
+    </header>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="mb-3">
+                    <button id="addToTable" (click)="addEditorial()" class="btn btn-primary">Nueva Editorial <i class="fas fa-plus"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <table class="table table-bordered table-striped mb-0" id="datatable-editable">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Dirección</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let editorial of editorials">
+                    <td>
+                        <div *ngIf="!editorial.editing">{{editorial.name}}</div>
+                        <input *ngIf="editorial.editing" [(ngModel)]="editorial.name" class="form-control"/>
+                    </td>
+                    <td>
+                        <div *ngIf="!editorial.editing">{{editorial.address}}</div>
+                        <input *ngIf="editorial.editing" [(ngModel)]="editorial.address" class="form-control"/>
+                    </td>
+                    <td class="actions">
+                        <a *ngIf="editorial.editing" class="save-row" (click)="saveEditorial(editorial)"><i class="fas fa-save"></i></a>
+                        <a *ngIf="editorial.editing" class="cancel-row" (click)="cancelEdit(editorial)"><i class="fas fa-times"></i></a>
+                        <a *ngIf="!editorial.editing" class="on-default edit-row" (click)="editEditorial(editorial)"><i class="fas fa-pencil-alt"></i></a>
+                        <a *ngIf="!editorial.editing" class="on-default remove-row" (click)="removeEditorial(editorial)"><i class="far fa-trash-alt"></i></a>
+                    </td>
+                </tr>
+            </tbody>
+
+        </table>
+    </div>
+</section>

@@ -1,0 +1,47 @@
+<section class="card">
+    <header class="card-header">
+        <div class="card-actions">
+            <a href="#" class="card-action card-action-toggle" data-card-toggle></a>
+        </div>
+        <h2 class="card-title">Lista de Préstamos</h2>
+    </header>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="mb-3">
+                    <button id="addToTable" [routerLink]="['/loan', '0']" class="btn btn-primary">Nuevo Préstamo <i class="fas fa-plus"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <table class="table table-responsive-md table-striped mb-0" id="datatable-editable">
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Fecha de Inicio</th>
+                    <th>Fecha de Fin</th>
+                    <th>Estado</th>
+                    <th>Tarifa</th>
+                    <th>Valor Total</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let loan of loans">
+                    <td>{{ loan.user.name }}</td>
+                    <td>{{ loan.loanDate }}</td>
+                    <td>{{ loan.expirationDate }}</td>
+                    <td [innerHTML]="loan.isActive ? '<span class=&quot;badge badge-success&quot;>Activo</span>' : '<span class=&quot;badge badge-danger&quot;>Inactivo</span>'"></td>
+                    <td>{{ loan.rate.description }}</td>
+                    <td>{{ getTotalLoanValue(loan) | currency }}</td>
+                    <td class="actions">
+                        <a class="on-default edit-row" [routerLink]="['/loan', loan.id]" routerLinkActive="router-link-active"><i class="fas fa-pencil-alt"></i></a>
+                        <a class="on-default remove-row" (click)="removeLoan(loan)"><i class="far fa-trash-alt"></i></a>
+                        <a class="on-default view-row" (click)="viewLoan(loan)"><i class="fas fa-eye"></i></a>
+                        <a class="on-default return-row" (click)="returnLoan(loan)"><i class="fas fa-undo"></i></a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</section>

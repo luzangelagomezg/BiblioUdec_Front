@@ -1,0 +1,69 @@
+<section class="card">
+    <header class="card-header">
+        <div class="card-actions">
+            <a href="#" class="card-action card-action-toggle" data-card-toggle></a>
+        </div>
+        <h2 class="card-title">Editoriales</h2>
+    </header>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="mb-3">
+                    <button id="addToTable" (click)="addBook()" class="btn btn-primary">Nuevo Libro <i class="fas fa-plus"></i></button>
+                </div>
+            </div>
+        </div>
+
+        <table class="table table-bordered table-striped mb-0" id="datatable-editable">
+            <thead>
+                <tr>
+                    <th>Título</th>
+                    <th>Autores</th>
+                    <th>Editorial</th>
+                    <th>ISBN</th>
+                    <th>Año</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let book of books">
+                    <td>
+                        <div *ngIf="!book.editing">{{book.name}}</div>
+                        <input *ngIf="book.editing" [(ngModel)]="book.name" class="form-control"/>
+                    </td>
+                    <td>
+                        <ng-container *ngIf="!book.editing">
+                            {{ book.authors && book.authors.length ? (book.authors | authorNames) : '' }}
+                        </ng-container>
+                        <select *ngIf="book.editing" multiple size="2" class="form-control" [(ngModel)]="book.authors">
+                            <option *ngFor="let author of allAuthors" [ngValue]="author">{{ author.name }}</option>
+                        </select>
+                    </td>
+                    <td>
+                        <ng-container *ngIf="!book.editing">
+                            {{ book.editorial ? book.editorial.name : '' }}
+                        </ng-container>
+                        <select *ngIf="book.editing" class="form-control" [(ngModel)]="book.editorial">
+                            <option *ngFor="let editorial of allEditorials" [ngValue]="editorial">{{ editorial.name }}</option>
+                        </select>
+                    </td>
+                    <td>
+                        <div *ngIf="!book.editing">{{book.isbn}}</div>
+                        <input *ngIf="book.editing" [(ngModel)]="book.isbn" class="form-control"/>
+                    </td>
+                    <td>
+                        <div *ngIf="!book.editing">{{book.year}}</div>
+                        <input *ngIf="book.editing" [(ngModel)]="book.year" class="form-control" type="number"/>
+                    </td>
+                    <td class="actions">
+                        <a *ngIf="!book.editing" class="on-default edit-row" (click)="editBook(book)"><i class="fas fa-pencil-alt"></i></a>
+                        <a *ngIf="!book.editing" class="on-default remove-row" (click)="removeBook(book)"><i class="far fa-trash-alt"></i></a>
+                        <a *ngIf="book.editing" class="save-row" (click)="saveBook(book)"><i class="fas fa-save"></i></a>
+                        <a *ngIf="book.editing" class="cancel-row" (click)="cancelEdit(book)"><i class="fas fa-times"></i></a>
+                    </td>
+                </tr>
+            </tbody>
+
+        </table>
+    </div>
+</section>
