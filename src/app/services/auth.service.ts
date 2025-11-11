@@ -21,6 +21,14 @@ export interface DecodedToken {
   exp: number;
 }
 
+export interface UserDetails {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  role: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -85,6 +93,7 @@ export class AuthService {
     try {
       const payload = token.split('.')[1];
       const decoded = JSON.parse(atob(payload));
+      console.log('Decoded token:', decoded);
       return decoded as DecodedToken;
     } catch (error) {
       console.error('Error decoding token:', error);
@@ -94,5 +103,19 @@ export class AuthService {
 
   getCurrentUser(): DecodedToken | null {
     return this.currentUserSubject.value;
+  }
+
+  getUserDetails(userId: string): Observable<UserDetails> {
+    return this.http.get<UserDetails>(`${this.baseUrl}/users/${userId}`);
+  }
+
+  isAdmin(): boolean {
+    const user = this.getCurrentUser();
+    return user?.role === 'admin';
+  }
+
+  isUser(): boolean {
+    const user = this.getCurrentUser();
+    return user?.role === 'user';
   }
 }

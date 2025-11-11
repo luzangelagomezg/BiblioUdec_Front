@@ -39,6 +39,8 @@ export class AppComponent {
     // Suscribirse al usuario actual
     this.authService.currentUser$.subscribe(user => {
       this.currentUser = user;
+      console.log('Current user:', user);
+      console.log('User role:', user?.role);
     });
   }
 

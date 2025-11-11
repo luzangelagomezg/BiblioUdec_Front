@@ -8,6 +8,7 @@ import { LoanListComponent } from './loan-list/loan-list.component';
 import { LoanEditComponent } from './loan-edit/loan-edit.component';
 import { LoginComponent } from './login/login.component';
 import { authGuard } from './guards/auth.guard';
+import { roleGuard } from './guards/role.guard';
 
 export const routes: Routes = [
     {
@@ -38,46 +39,51 @@ export const routes: Routes = [
     {
         path : 'users', 
         component : UserListComponent,
-        canActivate: [authGuard],
+        canActivate: [authGuard, roleGuard],
         data : {
             title : 'Usuarios',
-            breadcrumbs : ['Home', 'Usuarios']
+            breadcrumbs : ['Home', 'Usuarios'],
+            roles: ['admin']
         }
     },
     {
         path : 'authors', 
         component : AuthorListComponent,
-        canActivate: [authGuard],
+        canActivate: [authGuard, roleGuard],
         data : {
             title : 'Autores',
-            breadcrumbs : ['Home', 'Autores']
+            breadcrumbs : ['Home', 'Autores'],
+            roles: ['admin']
         }
     }, 
     {
         path : 'editoriales', 
         component : EditorialListComponent,
-        canActivate: [authGuard],
+        canActivate: [authGuard, roleGuard],
         data : {
             title : 'Editoriales',
-            breadcrumbs : ['Home', 'Editoriales']
+            breadcrumbs : ['Home', 'Editoriales'],
+            roles: ['admin']
         }
     },
     {
         path : 'books', 
         component : BookListComponent,
-        canActivate: [authGuard],
+        canActivate: [authGuard, roleGuard],
         data : {
             title : 'Libros',
-            breadcrumbs : ['Home', 'Libros']
+            breadcrumbs : ['Home', 'Libros'],
+            roles: ['admin']
         }
     },
     {
         path : 'rates', 
         component : RateListComponent,
-        canActivate: [authGuard],
+        canActivate: [authGuard, roleGuard],
         data : {
             title : 'Tarifas',
-            breadcrumbs : ['Home', 'Tarifas']
+            breadcrumbs : ['Home', 'Tarifas'],
+            roles: ['admin']
         }
     },
     { path: '**', redirectTo: '' }
