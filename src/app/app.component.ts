@@ -3,10 +3,11 @@ import { Component } from '@angular/core';
 import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { AuthService, DecodedToken } from './services/auth.service';
+import { ChatComponent } from './chat/chat.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, CommonModule],
+  imports: [RouterOutlet, CommonModule, ChatComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })

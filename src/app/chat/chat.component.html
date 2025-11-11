@@ -1,0 +1,116 @@
+<div class="chat-container" [class.minimized]="isMinimized">
+  <!-- Header del chat -->
+  <div class="chat-header" (click)="toggleMinimize()">
+    <div class="chat-header-title">
+      <i class="fas fa-comments"></i>
+      <span>Chat con Administrador</span>
+    </div>
+    <div class="chat-header-actions">
+      <span class="connection-status" [class.connected]="connectionStatus.connected">
+        <i class="fas fa-circle"></i>
+        {{ connectionStatus.status }}
+      </span>
+      <button class="btn-minimize" (click)="toggleMinimize(); $event.stopPropagation()">
+        <i class="fas" [class.fa-chevron-down]="!isMinimized" [class.fa-chevron-up]="isMinimized"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Contenido del chat -->
+  <div class="chat-body" *ngIf="!isMinimized">
+    <!-- Formulario de conexión -->
+    <div class="connection-form" *ngIf="showConnectionForm">
+      <h4>Conectar al Chat</h4>
+      <div class="form-group">
+        <label>Usuario XMPP:</label>
+        <input 
+          type="text" 
+          [(ngModel)]="xmppUsername" 
+          class="form-control" 
+          placeholder="usuario@servidor.com"
+        />
+      </div>
+      <div class="form-group">
+        <label>Contraseña:</label>
+        <input 
+          type="password" 
+          [(ngModel)]="xmppPassword" 
+          class="form-control"
+          placeholder="Contraseña XMPP"
+        />
+      </div>
+      <div class="form-group">
+        <label>URL BOSH:</label>
+        <input 
+          type="text" 
+          [(ngModel)]="boshUrl" 
+          class="form-control"
+          placeholder="http://localhost:5280/http-bind"
+        />
+      </div>
+      <div class="form-group">
+        <label>JID Admin:</label>
+        <input 
+          type="text" 
+          [(ngModel)]="adminJID" 
+          class="form-control"
+          placeholder="admin@localhost"
+          (change)="updateAdminJID(adminJID)"
+        />
+      </div>
+      <button class="btn btn-primary w-100" (click)="connect()">
+        <i class="fas fa-plug"></i> Conectar
+      </button>
+    </div>
+
+    <!-- Área de mensajes -->
+    <div class="chat-messages" *ngIf="!showConnectionForm">
+      <div class="chat-actions-top">
+        <button class="btn btn-sm btn-secondary" (click)="clearMessages()">
+          <i class="fas fa-trash"></i> Limpiar
+        </button>
+        <button class="btn btn-sm btn-danger" (click)="disconnect()">
+          <i class="fas fa-sign-out-alt"></i> Desconectar
+        </button>
+      </div>
+
+      <div class="messages-list">
+        <div 
+          *ngFor="let message of messages" 
+          class="message"
+          [class.outgoing]="message.isOutgoing"
+          [class.incoming]="!message.isOutgoing"
+        >
+          <div class="message-header">
+            <span class="message-from">{{ message.isOutgoing ? 'Tú' : 'Admin' }}</span>
+            <span class="message-time">{{ message.timestamp | date:'short' }}</span>
+          </div>
+          <div class="message-body">{{ message.body }}</div>
+        </div>
+        
+        <div *ngIf="messages.length === 0" class="no-messages">
+          <i class="fas fa-inbox"></i>
+          <p>No hay mensajes aún. Envía un mensaje para iniciar la conversación.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Área de envío -->
+    <div class="chat-input" *ngIf="!showConnectionForm && connectionStatus.connected">
+      <textarea 
+        [(ngModel)]="newMessage" 
+        class="form-control"
+        placeholder="Escribe tu mensaje..."
+        rows="2"
+        (keypress)="onKeyPress($event)"
+      ></textarea>
+      <button 
+        class="btn btn-primary"
+        (click)="sendMessage()"
+        [disabled]="!newMessage.trim()"
+      >
+        <i class="fas fa-paper-plane"></i> Enviar
+      </button>
+    </div>
+  </div>
+</div>

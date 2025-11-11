@@ -7,6 +7,7 @@ export interface User {
   email: string;
   phone: string;
   password?: string;
+  xmppUsername?: string;  // Usuario XMPP para chat (ej: usuario@servidor.com)
   role?: string;
   editing?: boolean;
 }

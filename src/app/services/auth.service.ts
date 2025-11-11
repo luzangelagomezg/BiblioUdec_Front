@@ -17,6 +17,7 @@ export interface DecodedToken {
   email: string;
   name: string;
   role: string;
+  xmppUsername?: string;
   iat: number;
   exp: number;
 }
