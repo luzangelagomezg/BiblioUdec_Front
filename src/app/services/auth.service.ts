@@ -25,7 +25,7 @@ export interface DecodedToken {
   providedIn: 'root'
 })
 export class AuthService {
-  private baseUrl = 'http://localhost:3000'; // Cambiar según tu configuración
+  private baseUrl = 'http://localhost:3000/api/v1'; // Cambiar según tu configuración
   private tokenKey = 'access_token';
   private currentUserSubject = new BehaviorSubject<DecodedToken | null>(this.getUserFromToken());
 
