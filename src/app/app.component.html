@@ -1,4 +1,4 @@
-<section class="body">
+<section class="body" *ngIf="currentUser">
   <header class="header">
     <div class="logo-container">
       <a href="#" class="logo">
@@ -124,3 +124,6 @@
     </section>
   </div>
 </section>
+
+<!-- Vista sin layout para login y páginas públicas -->
+<router-outlet *ngIf="!currentUser"></router-outlet>
