@@ -1,0 +1,113 @@
+<!doctype html>
+<html class="fixed">
+<head>
+  <meta charset="UTF-8">
+  <meta name="keywords" content="HTML5 Admin Template" />
+  <meta name="description" content="BiblioUdec - Sistema de Gestión de Biblioteca">
+  <meta name="author" content="BiblioUdec">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  
+  <link href="https://fonts.googleapis.com/css?family=Poppins:300,400,500,600,700,800|Shadows+Into+Light" rel="stylesheet" type="text/css">
+</head>
+<body>
+  <section class="body-sign">
+    <div class="center-sign">
+      <a href="/" class="logo float-left">
+        <img src="/img/logo.png" height="70" alt="BiblioUdec" />
+      </a>
+
+      <div class="panel card-sign">
+        <div class="card-title-sign mt-3 text-end">
+          <h2 class="title text-uppercase font-weight-bold m-0">
+            <i class="bx bx-user-circle me-1 text-6 position-relative top-5"></i> Iniciar Sesión
+          </h2>
+        </div>
+        <div class="card-body">
+          <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+            
+            <!-- Mensaje de error -->
+            <div *ngIf="errorMessage" class="alert alert-danger" role="alert">
+              <i class="fas fa-exclamation-circle me-2"></i>{{ errorMessage }}
+            </div>
+
+            <!-- Campo Email/Username -->
+            <div class="form-group mb-3">
+              <label>Email</label>
+              <div class="input-group">
+                <input 
+                  name="email" 
+                  type="email" 
+                  class="form-control form-control-lg" 
+                  [(ngModel)]="email"
+                  required
+                  #emailInput="ngModel"
+                  [disabled]="isLoading"
+                />
+                <span class="input-group-text">
+                  <i class="bx bx-user text-4"></i>
+                </span>
+              </div>
+              <div *ngIf="emailInput.invalid && emailInput.touched" class="text-danger small mt-1">
+                El email es requerido
+              </div>
+            </div>
+
+            <!-- Campo Password -->
+            <div class="form-group mb-3">
+              <div class="clearfix">
+                <label class="float-left">Contraseña</label>
+              </div>
+              <div class="input-group">
+                <input 
+                  name="password" 
+                  type="password" 
+                  class="form-control form-control-lg"
+                  [(ngModel)]="password"
+                  required
+                  #passwordInput="ngModel"
+                  [disabled]="isLoading"
+                />
+                <span class="input-group-text">
+                  <i class="bx bx-lock text-4"></i>
+                </span>
+              </div>
+              <div *ngIf="passwordInput.invalid && passwordInput.touched" class="text-danger small mt-1">
+                La contraseña es requerida
+              </div>
+            </div>
+
+            <!-- Remember Me y Botón -->
+            <div class="row">
+              <div class="col-sm-8">
+                <div class="checkbox-custom checkbox-default">
+                  <input 
+                    id="RememberMe" 
+                    name="rememberme" 
+                    type="checkbox"
+                    [(ngModel)]="rememberMe"
+                    [disabled]="isLoading"
+                  />
+                  <label for="RememberMe">Recordarme</label>
+                </div>
+              </div>
+              <div class="col-sm-4 text-end">
+                <button 
+                  type="submit" 
+                  class="btn btn-primary mt-2"
+                  [disabled]="isLoading || loginForm.invalid"
+                >
+                  <span *ngIf="isLoading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                  <span *ngIf="!isLoading">Ingresar</span>
+                  <span *ngIf="isLoading">Ingresando...</span>
+                </button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <p class="text-center text-muted mt-3 mb-3">&copy; Copyright 2025. BiblioUdec - Universidad de Cartagena.</p>
+    </div>
+  </section>
+</body>
+</html>
