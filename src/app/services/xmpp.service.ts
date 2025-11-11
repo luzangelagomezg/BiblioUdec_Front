@@ -3,8 +3,6 @@ import { BehaviorSubject, Observable } from 'rxjs';
 
 // Declaración de tipos para Strophe.js
 declare const Strophe: any;
-declare const $msg: any;
-declare const $pres: any;
 
 export interface ChatMessage {
   from: string;
@@ -34,17 +32,17 @@ export class XmppService {
   public connectionStatus$: Observable<ConnectionStatus> = this.connectionStatusSubject.asObservable();
 
   private currentUsername: string = '';
-  private adminJID: string = 'admin@localhost'; // Ajustar según tu configuración
+  private adminJID: string = 'admin@bibliotecaudec.online'; // JID del administrador
 
   constructor() {}
 
   /**
    * Conectar al servidor XMPP
-   * @param username - Usuario XMPP (ej: usuario@servidor.com)
+   * @param username - Usuario XMPP (ej: usuario@bibliotecaudec.online)
    * @param password - Contraseña del usuario XMPP
-   * @param boshUrl - URL del servicio BOSH (ej: http://localhost:5280/http-bind)
+   * @param boshUrl - URL del servicio BOSH (ej: http://xmpp.bibliotecaudec.online/http-bind)
    */
-  connect(username: string, password: string, boshUrl: string = 'http://localhost:5280/http-bind') {
+  connect(username: string, password: string, boshUrl: string = 'http://xmpp.bibliotecaudec.online/http-bind') {
     this.currentUsername = username;
     
     // Crear conexión con Strophe
@@ -87,7 +85,8 @@ export class XmppService {
         'chat'
       );
       // Enviar presencia
-      this.connection.send(Strophe.$pres());
+      const pres = Strophe.$pres ? Strophe.$pres() : new Strophe.Builder('presence');
+      this.connection.send(pres);
     } else if (status === Strophe.Status.DISCONNECTED) {
       this.connectionStatusSubject.next({ connected: false, status: statusText });
     } else {
@@ -142,11 +141,22 @@ export class XmppService {
       return;
     }
 
-    const message = Strophe.$msg({
-      to: to,
-      from: this.connection.jid,
-      type: 'chat'
-    }).c('body').t(messageText);
+    // Crear mensaje usando Strophe.$msg o Strophe.Builder
+    let message;
+    if (Strophe.$msg) {
+      message = Strophe.$msg({
+        to: to,
+        from: this.connection.jid,
+        type: 'chat'
+      }).c('body').t(messageText);
+    } else {
+      // Fallback usando Builder directamente
+      message = new Strophe.Builder('message', {
+        to: to,
+        from: this.connection.jid,
+        type: 'chat'
+      }).c('body').t(messageText);
+    }
 
     this.connection.send(message);
 

@@ -18,16 +18,22 @@
 
   <!-- Contenido del chat -->
   <div class="chat-body" *ngIf="!isMinimized">
+    <!-- Mensaje de conexión automática -->
+    <div class="auto-connecting" *ngIf="autoConnecting">
+      <div class="spinner"></div>
+      <p>Conectando automáticamente...</p>
+    </div>
+
     <!-- Formulario de conexión -->
-    <div class="connection-form" *ngIf="showConnectionForm">
-      <h4>Conectar al Chat</h4>
+    <div class="connection-form" *ngIf="showConnectionForm && !autoConnecting">
+      <h4>Configuración de Conexión</h4>
       <div class="form-group">
         <label>Usuario XMPP:</label>
         <input 
           type="text" 
           [(ngModel)]="xmppUsername" 
           class="form-control" 
-          placeholder="usuario@servidor.com"
+          placeholder="usuario@bibliotecaudec.online"
         />
       </div>
       <div class="form-group">
@@ -45,7 +51,7 @@
           type="text" 
           [(ngModel)]="boshUrl" 
           class="form-control"
-          placeholder="http://localhost:5280/http-bind"
+          placeholder="http://xmpp.bibliotecaudec.online/http-bind"
         />
       </div>
       <div class="form-group">
@@ -54,7 +60,7 @@
           type="text" 
           [(ngModel)]="adminJID" 
           class="form-control"
-          placeholder="admin@localhost"
+          placeholder="admin@bibliotecaudec.online"
           (change)="updateAdminJID(adminJID)"
         />
       </div>
@@ -64,10 +70,13 @@
     </div>
 
     <!-- Área de mensajes -->
-    <div class="chat-messages" *ngIf="!showConnectionForm">
+    <div class="chat-messages" *ngIf="!showConnectionForm && !autoConnecting">
       <div class="chat-actions-top">
         <button class="btn btn-sm btn-secondary" (click)="clearMessages()">
           <i class="fas fa-trash"></i> Limpiar
+        </button>
+        <button class="btn btn-sm btn-warning" (click)="showConnectionSettings()">
+          <i class="fas fa-cog"></i> Config
         </button>
         <button class="btn btn-sm btn-danger" (click)="disconnect()">
           <i class="fas fa-sign-out-alt"></i> Desconectar
@@ -96,7 +105,7 @@
     </div>
 
     <!-- Área de envío -->
-    <div class="chat-input" *ngIf="!showConnectionForm && connectionStatus.connected">
+    <div class="chat-input" *ngIf="!showConnectionForm && !autoConnecting && connectionStatus.connected">
       <textarea 
         [(ngModel)]="newMessage" 
         class="form-control"

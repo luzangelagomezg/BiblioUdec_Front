@@ -19,12 +19,13 @@ export class ChatComponent implements OnInit, OnDestroy {
   
   // Configuración XMPP
   xmppUsername: string = '';
-  xmppPassword: string = '';
-  boshUrl: string = 'http://localhost:5280/http-bind';
-  adminJID: string = 'admin@localhost';
+  xmppPassword: string = '12345678';
+  boshUrl: string = 'ws://xmpp.bibliotecaudec.online:5280/xmpp-websocket';
+  adminJID: string = 'admin@xmpp.bibliotecaudec.online';
   
-  showConnectionForm: boolean = true;
-  isMinimized: boolean = false;
+  showConnectionForm: boolean = false;
+  isMinimized: boolean = true;
+  autoConnecting: boolean = false;
 
   private messagesSubscription?: Subscription;
   private statusSubscription?: Subscription;
@@ -57,10 +58,16 @@ export class ChatComponent implements OnInit, OnDestroy {
     // Configurar JID del admin
     this.xmppService.setAdminJID(this.adminJID);
 
-    // Obtener usuario actual (si existe)
+    // Obtener usuario actual y conectar automáticamente
     const currentUser = this.authService.getCurrentUser();
-    if (currentUser && currentUser.xmppUsername) {
-      this.xmppUsername = currentUser.xmppUsername;
+    if (currentUser && currentUser.name) {
+      // Generar username XMPP: nombre en minúsculas con guiones en lugar de espacios
+      const xmppUser = currentUser.name.toLowerCase().replace(/\s+/g, '-');
+      this.xmppUsername = `${xmppUser}@xmpp.bibliotecaudec.online`;
+      
+      // Conectar automáticamente
+      this.autoConnecting = true;
+      this.connect();
     }
   }
 
@@ -80,6 +87,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     }
 
     this.xmppService.connect(this.xmppUsername, this.xmppPassword, this.boshUrl);
+    this.autoConnecting = false;
   }
 
   /**
@@ -87,7 +95,7 @@ export class ChatComponent implements OnInit, OnDestroy {
    */
   disconnect() {
     this.xmppService.disconnect();
-    this.showConnectionForm = true;
+    this.showConnectionForm = false;
   }
 
   /**
@@ -132,6 +140,13 @@ export class ChatComponent implements OnInit, OnDestroy {
    */
   toggleMinimize() {
     this.isMinimized = !this.isMinimized;
+  }
+
+  /**
+   * Mostrar formulario de conexión
+   */
+  showConnectionSettings() {
+    this.showConnectionForm = true;
   }
 
   /**
