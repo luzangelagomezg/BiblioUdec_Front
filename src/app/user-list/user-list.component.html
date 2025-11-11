@@ -20,6 +20,8 @@
                     <th>Nombre</th>
                     <th>Email</th>
                     <th>Dirección</th>
+                    <th>Password</th>
+                    <th>Rol</th>
                     <th>Acciones</th>
                 </tr>
             </thead>
@@ -36,6 +38,17 @@
                     <td>
                         <div *ngIf="!user.editing">{{user.phone}}</div>
                         <input *ngIf="user.editing" [(ngModel)]="user.phone" class="form-control"/>
+                    </td>
+                    <td>
+                        <div *ngIf="!user.editing">******</div>
+                        <input *ngIf="user.editing" type="password" [(ngModel)]="user.password" class="form-control" [placeholder]="user.id ? '******' : 'Ingrese password'"/>
+                    </td>
+                    <td>
+                        <div *ngIf="!user.editing">{{user.role}}</div>
+                        <select *ngIf="user.editing" [(ngModel)]="user.role" class="form-control">
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
                     </td>
                     <td class="actions">
                         <a *ngIf="user.editing" class="save-row" (click)="saveUser(user)"><i class="fas fa-save"></i></a>

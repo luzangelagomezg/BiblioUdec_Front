@@ -29,13 +29,22 @@ addUser() {
 }
 
 editUser(user: User) {
+  // Al editar un usuario existente, mostramos ****** en lugar del password real
+  if (user.id) {
+    user.password = '******';
+  }
   user.editing = true;
 }
 
 saveUser(user: User) {
   console.log('Usuario guardado:', user);
   if (user.id) {
-    this.userService.updateUser(user.id, user).subscribe(() => {
+    // Si es edición y el password está vacío o es ******, no lo enviamos
+    const userData = { ...user };
+    if (!userData.password || userData.password === '******') {
+      delete userData.password;
+    }
+    this.userService.updateUser(user.id, userData).subscribe(() => {
       console.log('Usuario actualizado');
       user.editing = false;
     });
@@ -73,6 +82,8 @@ private EmptyUser(): User {
       name: '',
       email: '',
       phone: '',
+      password: '',
+      role: 'user',
       editing: true
     };
 }
