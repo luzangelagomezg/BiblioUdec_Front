@@ -7,7 +7,7 @@ import { Rate, RateService } from '../services/rate.service';
 import { Loan, LoanService } from '../services/loan.service';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
-import { forkJoin } from 'rxjs';
+import { forkJoin, lastValueFrom } from 'rxjs';
 
 @Component({
   selector: 'app-loan-edit',
@@ -48,11 +48,11 @@ export class LoanEditComponent implements OnInit {
     this.currentUserId = currentUser?.sub || '';
 
     // Cargar datos necesarios
-    if (this.isAdmin) {
-      this.loadUsers();
-      this.loadRates();
-    }
-    this.loadBooks();
+    //if (this.isAdmin) {
+    await this.loadUsers();
+    await this.loadRates();
+    //}
+    await this.loadBooks();
 
     this.loanId = this.route.snapshot.paramMap.get('id') || '';
     if (this.loanId === '0') {
@@ -70,44 +70,38 @@ export class LoanEditComponent implements OnInit {
       this.loan = newLoan;
       
       // Si no es admin, cargar info del usuario actual
-      if (!this.isAdmin) {
-        this.userService.getUserById(this.currentUserId).subscribe(user => {
-          this.loan.user = user;
-        });
-      }
+      /*if (!this.isAdmin) {
+        const user = await lastValueFrom(this.userService.getUserById(this.currentUserId));
+        this.loan.user = user;
+      }*/
+      this.trySyncLoan();
     }
     else {
-      this.loanService.getLoanById(this.loanId).subscribe(loan => {
-        loan.loanDate = this.isoToDateString(loan.loanDate);
-        loan.expirationDate = this.isoToDateString(loan.expirationDate);
-        this.loan = loan;
-        this.trySyncLoan();
-      })
+      const loan = await lastValueFrom(this.loanService.getLoanById(this.loanId));
+      loan.loanDate = this.isoToDateString(loan.loanDate);
+      loan.expirationDate = this.isoToDateString(loan.expirationDate);
+      this.loan = loan;
+
     }
 
   }
 
-  loadRates(): void {
-    this.rateService.getRates().subscribe(rates => {
-      this.rates = rates;
-      this.ratesLoaded = true;
-      this.trySyncLoan();
-    });
+  async loadRates(): Promise<void> {
+    this.rates = await lastValueFrom(this.rateService.getRates());
+    this.ratesLoaded = true;
+    
   }
   
-  loadBooks(): void {
-    this.bookService.getBooks().subscribe(books => {
-      this.books = books;
-      this.booksLoaded = true;
-      this.trySyncLoan();
-    });
+  async loadBooks(): Promise<void> {
+    this.books = await lastValueFrom(this.bookService.getBooks());
+    this.booksLoaded = true;
+
   }
-  loadUsers() {
-    this.userService.getUsers().subscribe(users => {
-      this.users = users;
-      this.usersLoaded = true;
-      this.trySyncLoan();
-    });
+  
+  async loadUsers(): Promise<void> {
+    this.users = await lastValueFrom(this.userService.getUsers());
+    this.usersLoaded = true;
+
   }
 
   saveLoan(loan: Loan){
@@ -179,20 +173,31 @@ export class LoanEditComponent implements OnInit {
   }
 
   private syncLoanReferences() {
-    if (this.loan && this.users.length && this.rates.length && this.books.length) {
-      // Sincroniza user
-      this.loan.user = this.users.find(u => u.id === this.loan.user?.id) || {id:'',name:'',phone:'',email:''};
-      // Sincroniza rate
-      this.loan.rate = this.rates.find(r => r.id === this.loan.rate?.id) || {id:'',description:'',value:0};
-      // Sincroniza books
-      this.loan.books = this.loan.books
-        .map(b => this.books.find(book => book.id === b.id))
-        .filter(b => !!b) as Book[];
+    if (this.loan) {
+      // Solo sincronizar si es admin y hay datos cargados
+      if (this.isAdmin && this.users.length && this.rates.length && this.books.length) {
+        // Sincroniza user
+        this.loan.user = this.users.find(u => u.id === this.loan.user?.id) || {id:'',name:'',phone:'',email:''};
+        // Sincroniza rate
+        this.loan.rate = this.rates.find(r => r.id === this.loan.rate?.id) || {id:'',description:'',value:0};
+        // Sincroniza books
+        this.loan.books = this.loan.books
+          .map(b => this.books.find(book => book.id === b.id))
+          .filter(b => !!b) as Book[];
+      } else if (!this.isAdmin && this.books.length) {
+         this.loan.user = this.users.find(u => u.id === this.loan.user?.id) || {id:'',name:'',phone:'',email:''};
+        // Para usuarios normales, solo sincronizar books
+        this.loan.books = this.loan.books
+          .map(b => this.books.find(book => book.id === b.id))
+          .filter(b => !!b) as Book[];
+      }
     }
   }
 
   private trySyncLoan() {
-    if (this.usersLoaded && this.booksLoaded && this.ratesLoaded && this.loan) {
+    if (this.isAdmin && this.usersLoaded && this.booksLoaded && this.ratesLoaded && this.loan) {
+      this.syncLoanReferences();
+    } else if (!this.isAdmin && this.booksLoaded && this.loan) {
       this.syncLoanReferences();
     }
   }

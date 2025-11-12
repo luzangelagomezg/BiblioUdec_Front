@@ -21,11 +21,11 @@
           <div id="userbox" class="userbox">
 						<a href="#" data-bs-toggle="dropdown">
 							<figure class="profile-picture">
-								<img src="img/!logged-user.jpg" [attr.alt]="currentUser?.name || 'Usuario'" class="rounded-circle" [attr.data-lock-picture]="'img/!logged-user.jpg'" />
+								<img src="img/!logged-user.jpg" [attr.alt]="currentUser ? currentUser.name : 'Usuario'" class="rounded-circle" [attr.data-lock-picture]="'img/!logged-user.jpg'" />
 							</figure>
-							<div class="profile-info" [attr.data-lock-name]="currentUser?.name || 'Usuario'" [attr.data-lock-email]="currentUser?.email || ''">
-								<span class="name">{{ currentUser?.name || 'Usuario' }}</span>
-								<span class="role">{{ currentUser?.role || 'user' }}</span>
+							<div class="profile-info" [attr.data-lock-name]="currentUser ? currentUser.name : 'Usuario'" [attr.data-lock-email]="currentUser ? currentUser.email : ''">
+								<span class="name">{{ currentUser ? currentUser.name : 'Usuario' }}</span>
+								<span class="role">{{ currentUser ? currentUser.role : 'user' }}</span>
 							</div>
 
 							<i class="fa custom-caret"></i>
