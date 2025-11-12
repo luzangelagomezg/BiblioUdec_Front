@@ -26,6 +26,12 @@ export class ChatComponent implements OnInit, OnDestroy {
   showConnectionForm: boolean = false;
   isMinimized: boolean = true;
   autoConnecting: boolean = false;
+  
+  // Variables para admin
+  isAdmin: boolean = false;
+  conversations: Map<string, ChatMessage[]> = new Map();
+  activeConversation: string | null = null;
+  conversationsList: string[] = [];
 
   private messagesSubscription?: Subscription;
   private statusSubscription?: Subscription;
@@ -36,10 +42,22 @@ export class ChatComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit() {
+    // Obtener usuario actual
+    const currentUser = this.authService.getCurrentUser();
+    
+    // Verificar si es admin
+    this.isAdmin = currentUser?.role === 'admin';
+    
     // Suscribirse a mensajes
     this.messagesSubscription = this.xmppService.messages$.subscribe(
       (messages) => {
-        this.messages = messages;
+        if (this.isAdmin) {
+          // Organizar mensajes por conversación
+          this.organizeConversations(messages);
+        } else {
+          // Usuario normal: mostrar todos los mensajes
+          this.messages = messages;
+        }
         // Auto-scroll al final
         setTimeout(() => this.scrollToBottom(), 100);
       }
@@ -58,8 +76,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     // Configurar JID del admin
     this.xmppService.setAdminJID(this.adminJID);
 
-    // Obtener usuario actual y conectar automáticamente
-    const currentUser = this.authService.getCurrentUser();
+    // Conectar automáticamente
     if (currentUser && currentUser.name) {
       // Generar username XMPP: nombre en minúsculas con guiones en lugar de espacios
       const xmppUser = currentUser.name.toLowerCase().replace(/\s+/g, '-');
@@ -111,8 +128,88 @@ export class ChatComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.xmppService.sendMessageToAdmin(this.newMessage);
+    if (this.isAdmin && this.activeConversation) {
+      // Admin responde a un usuario específico
+      this.xmppService.sendMessage(this.activeConversation, this.newMessage);
+    } else {
+      // Usuario normal envía al admin
+      this.xmppService.sendMessageToAdmin(this.newMessage);
+    }
+    
     this.newMessage = '';
+  }
+
+  /**
+   * Organizar mensajes por conversación (solo para admin)
+   */
+  private organizeConversations(messages: ChatMessage[]) {
+    this.conversations.clear();
+    
+    messages.forEach(msg => {
+      // Determinar el contacto (el otro usuario en la conversación)
+      const contact = msg.isOutgoing ? msg.to : msg.from;
+      
+      // Ignorar mensajes del admin consigo mismo
+      if (contact === this.xmppUsername || contact.includes('admin')) {
+        return;
+      }
+      
+      if (!this.conversations.has(contact)) {
+        this.conversations.set(contact, []);
+      }
+      
+      this.conversations.get(contact)!.push(msg);
+    });
+    
+    // Actualizar lista de conversaciones
+    this.conversationsList = Array.from(this.conversations.keys());
+    
+    // Si hay una conversación activa, actualizar sus mensajes
+    if (this.activeConversation && this.conversations.has(this.activeConversation)) {
+      this.messages = this.conversations.get(this.activeConversation)!;
+    } else if (this.conversationsList.length > 0 && !this.activeConversation) {
+      // Seleccionar la primera conversación si no hay ninguna activa
+      this.selectConversation(this.conversationsList[0]);
+    }
+  }
+
+  /**
+   * Seleccionar una conversación (solo para admin)
+   */
+  selectConversation(contact: string) {
+    this.activeConversation = contact;
+    this.messages = this.conversations.get(contact) || [];
+    setTimeout(() => this.scrollToBottom(), 100);
+  }
+
+  /**
+   * Obtener nombre del usuario desde JID
+   */
+  getUsernameFromJID(jid: string): string {
+    return jid.split('@')[0].replace(/-/g, ' ');
+  }
+
+  /**
+   * Obtener último mensaje de una conversación
+   */
+  getLastMessage(contact: string): string {
+    const msgs = this.conversations.get(contact);
+    if (!msgs || msgs.length === 0) return 'Sin mensajes';
+    
+    const lastMsg = msgs[msgs.length - 1];
+    return lastMsg.body.substring(0, 50) + (lastMsg.body.length > 50 ? '...' : '');
+  }
+
+  /**
+   * Verificar si hay mensajes no leídos (simplificado)
+   */
+  hasUnreadMessages(contact: string): boolean {
+    const msgs = this.conversations.get(contact);
+    if (!msgs || msgs.length === 0) return false;
+    
+    // Simplificación: considera no leído si el último mensaje es entrante
+    const lastMsg = msgs[msgs.length - 1];
+    return !lastMsg.isOutgoing;
   }
 
   /**
