@@ -118,7 +118,9 @@ export class LoanEditComponent implements OnInit {
     
     if (!this.isAdmin) {
       // Si no es admin, forzar el usuario actual y estado creado
-      loanToSend.user = { ...loan.user, id: this.currentUserId };
+      if (loan.user) {
+        loanToSend.user = { ...loan.user, id: this.currentUserId };
+      }
       loanToSend.status = 'creado';
       // Eliminar el rate completamente del objeto a enviar
       delete (loanToSend as any).rate;
@@ -131,9 +133,13 @@ export class LoanEditComponent implements OnInit {
         loan.id = newLoan.id;
         
         const associations = [
-          this.loanService.associateBooksToLoan(loan.id, loan.books),
-          this.loanService.associateUserToLoan(loan.id, loan.user)
+          this.loanService.associateBooksToLoan(loan.id, loan.books)
         ];
+        
+        // Asociar usuario si existe
+        if (loan.user) {
+          associations.push(this.loanService.associateUserToLoan(loan.id, loan.user));
+        }
         
         // Solo asociar tarifa si es admin y tiene tarifa
         if (this.isAdmin && loan.rate?.id) {
@@ -151,9 +157,13 @@ export class LoanEditComponent implements OnInit {
         console.log('loan actualizado');
         
         const associations = [
-          this.loanService.associateBooksToLoan(loan.id, loan.books),
-          this.loanService.associateUserToLoan(loan.id, loan.user)
+          this.loanService.associateBooksToLoan(loan.id, loan.books)
         ];
+        
+        // Asociar usuario si existe
+        if (loan.user) {
+          associations.push(this.loanService.associateUserToLoan(loan.id, loan.user));
+        }
         
         // Solo asociar tarifa si es admin y tiene tarifa
         if (this.isAdmin && loan.rate?.id) {

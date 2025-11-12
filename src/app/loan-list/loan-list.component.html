@@ -29,7 +29,7 @@
             </thead>
             <tbody>
                 <tr *ngFor="let loan of loans">
-                    <td>{{ loan.user?.name || 'N/A' }}</td>
+                    <td>{{ loan.user ? loan.user.name : 'N/A' }}</td>
                     <td>
                         <span *ngFor="let book of loan.books; let last = last">
                             {{ book.name }}<span *ngIf="!last">, </span>
@@ -71,7 +71,7 @@
                 <button type="button" class="btn-close" (click)="closeApprovalModal()"></button>
             </div>
             <div class="modal-body">
-                <p><strong>Usuario:</strong> {{ selectedLoan?.user?.name }}</p>
+                <p><strong>Usuario:</strong> {{ selectedLoan && selectedLoan.user ? selectedLoan.user.name : 'N/A' }}</p>
                 <p><strong>Libros:</strong> 
                     <span *ngFor="let book of selectedLoan?.books; let last = last">
                         {{ book.name }}<span *ngIf="!last">, </span>

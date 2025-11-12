@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { XmppService, ChatMessage, ConnectionStatus } from '../services/xmpp.service';
 import { AuthService } from '../services/auth.service';
+import { environment } from '../../environments/environment';
 
 @Component({
   selector: 'app-chat',
@@ -19,9 +20,9 @@ export class ChatComponent implements OnInit, OnDestroy {
   
   // Configuración XMPP
   xmppUsername: string = '';
-  xmppPassword: string = '12345678';
-  boshUrl: string = 'ws://xmpp.bibliotecaudec.online:5280/xmpp-websocket';
-  adminJID: string = 'admin@xmpp.bibliotecaudec.online';
+  xmppPassword: string = environment.xmpp.defaultPassword;
+  boshUrl: string = environment.xmpp.boshUrl;
+  adminJID: string = environment.xmpp.adminJid;
   
   showConnectionForm: boolean = false;
   isMinimized: boolean = true;
@@ -80,7 +81,7 @@ export class ChatComponent implements OnInit, OnDestroy {
     if (currentUser && currentUser.name) {
       // Generar username XMPP: nombre en minúsculas con guiones en lugar de espacios
       const xmppUser = currentUser.name.toLowerCase().replace(/\s+/g, '-');
-      this.xmppUsername = `${xmppUser}@xmpp.bibliotecaudec.online`;
+      this.xmppUsername = `${xmppUser}@${environment.xmpp.domain}`;
       
       // Conectar automáticamente
       this.autoConnecting = true;

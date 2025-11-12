@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { environment } from '../../environments/environment';
 
 export interface User {
   id: string;
@@ -16,7 +17,7 @@ export interface User {
   providedIn: 'root'
 })
 export class UserService {
-  private apiUrl = 'http://localhost:3000/api/v1/';
+  private apiUrl = `${environment.apiUrl}/`;
   constructor(private http: HttpClient) { }
 
   getUsers() {

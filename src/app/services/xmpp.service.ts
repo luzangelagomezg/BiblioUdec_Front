@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 // Declaración de tipos para Strophe.js
 declare const Strophe: any;
@@ -32,7 +33,7 @@ export class XmppService {
   public connectionStatus$: Observable<ConnectionStatus> = this.connectionStatusSubject.asObservable();
 
   private currentUsername: string = '';
-  private adminJID: string = 'admin@bibliotecaudec.online'; // JID del administrador
+  private adminJID: string = environment.xmpp.adminJid;
 
   constructor() {}
 
@@ -40,9 +41,9 @@ export class XmppService {
    * Conectar al servidor XMPP
    * @param username - Usuario XMPP (ej: usuario@bibliotecaudec.online)
    * @param password - Contraseña del usuario XMPP
-   * @param boshUrl - URL del servicio BOSH (ej: http://xmpp.bibliotecaudec.online/http-bind)
+   * @param boshUrl - URL del servicio BOSH
    */
-  connect(username: string, password: string, boshUrl: string = 'http://xmpp.bibliotecaudec.online/http-bind') {
+  connect(username: string, password: string, boshUrl: string = environment.xmpp.boshUrl) {
     this.currentUsername = username;
     
     // Crear conexión con Strophe

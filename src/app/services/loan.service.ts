@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { Book } from './book.service';
 import { User } from './user.service';
 import { Rate } from './rate.service';
+import { environment } from '../../environments/environment';
 
 export interface Loan {
   id: string,
@@ -11,7 +12,7 @@ export interface Loan {
   isActive: boolean,
   status?: 'creado' | 'aprobado' | 'rechazado' | 'finalizado',
   books: Book[],
-  user: User,
+  user?: User,
   rate?: Rate
 }
 
@@ -19,7 +20,7 @@ export interface Loan {
   providedIn: 'root'
 })
 export class LoanService {
-  private apiUrl = 'http://localhost:3000/api/v1/loans';
+  private apiUrl = `${environment.apiUrl}/loans`;
 
   constructor(private http: HttpClient) { }
 

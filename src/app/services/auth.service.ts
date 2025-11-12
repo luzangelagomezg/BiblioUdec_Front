@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, tap } from 'rxjs';
 import { Router } from '@angular/router';
+import { environment } from '../../environments/environment';
 
 export interface LoginRequest {
   email: string;
@@ -34,7 +35,7 @@ export interface UserDetails {
   providedIn: 'root'
 })
 export class AuthService {
-  private baseUrl = 'http://localhost:3000/api/v1'; // Cambiar según tu configuración
+  private baseUrl = environment.apiUrl;
   private tokenKey = 'access_token';
   private currentUserSubject = new BehaviorSubject<DecodedToken | null>(this.getUserFromToken());
 
