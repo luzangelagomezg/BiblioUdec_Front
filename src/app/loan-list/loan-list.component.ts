@@ -5,6 +5,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Loan, LoanService } from '../services/loan.service';
 import { Book } from '../services/book.service';
+import { AuthService } from '../services/auth.service';
+import { Rate, RateService } from '../services/rate.service';
 
 @Component({
   selector: 'app-loan-list',
@@ -13,26 +15,61 @@ import { Book } from '../services/book.service';
   styleUrl: './loan-list.component.scss'
 })
 export class LoanListComponent implements OnInit {
+  loans: Loan[] = [];
+  isAdmin: boolean = false;
+  currentUserId: string = '';
+  
+  // Para el modal de aprobación
+  selectedLoan: Loan | null = null;
+  rates: Rate[] = [];
+  selectedRateId: string = '';
+  showApprovalModal: boolean = false;
 
   constructor(
-    private loanService: LoanService
+    private loanService: LoanService,
+    private authService: AuthService,
+    private rateService: RateService
   ){}
 
-
-  loans: Loan[] = [];
-
   ngOnInit(): void {
+    const currentUser = this.authService.getCurrentUser();
+    this.isAdmin = currentUser?.role === 'admin';
+    this.currentUserId = currentUser?.sub || '';
+    
     this.loadLoans();
+    
+    if (this.isAdmin) {
+      this.loadRates();
+    }
   }
   loadLoans() {
-    this.loanService.getLoans().subscribe(loans => {
-      loans.forEach(loan => {
-        loan.loanDate = this.isoToDateString(loan.loanDate);
-        loan.expirationDate = this.isoToDateString(loan.expirationDate);
-        loan.isActive = loan.isActive !== undefined ? loan.isActive : true;
+    if (this.isAdmin) {
+      // Admin: cargar todos los préstamos
+      this.loanService.getLoans().subscribe(loans => {
+        this.processLoans(loans);
       });
-      this.loans = loans;
+    } else {
+      // Usuario: cargar solo sus préstamos
+      this.loanService.getLoansByUser(this.currentUserId).subscribe(loans => {
+        this.processLoans(loans);
+      });
+    }
+  }
+
+  loadRates() {
+    this.rateService.getRates().subscribe(rates => {
+      this.rates = rates;
     });
+  }
+
+  processLoans(loans: Loan[]) {
+    loans.forEach(loan => {
+      loan.loanDate = this.isoToDateString(loan.loanDate);
+      loan.expirationDate = this.isoToDateString(loan.expirationDate);
+      loan.isActive = loan.isActive !== undefined ? loan.isActive : true;
+      loan.status = loan.status || 'creado';
+    });
+    this.loans = loans;
   }
 
   addLoan() {
@@ -87,5 +124,60 @@ export class LoanListComponent implements OnInit {
     this.loanService.updateLoan(loan).subscribe(() => {
       console.log('Préstamo actualizado:', loan);
     });
+  }
+
+  // Métodos para admin
+  openApprovalModal(loan: Loan) {
+    this.selectedLoan = loan;
+    this.selectedRateId = loan.rate?.id || '';
+    this.showApprovalModal = true;
+  }
+
+  closeApprovalModal() {
+    this.showApprovalModal = false;
+    this.selectedLoan = null;
+    this.selectedRateId = '';
+  }
+
+  approveLoan() {
+    if (!this.selectedLoan || !this.selectedRateId) {
+      alert('Por favor seleccione una tarifa');
+      return;
+    }
+
+    this.loanService.approveLoan(this.selectedLoan.id, this.selectedRateId).subscribe(() => {
+      console.log('Préstamo aprobado');
+      this.closeApprovalModal();
+      this.loadLoans();
+    });
+  }
+
+  rejectLoan(loan: Loan) {
+    if (confirm('¿Está seguro que desea rechazar este préstamo?')) {
+      this.loanService.rejectLoan(loan.id).subscribe(() => {
+        console.log('Préstamo rechazado');
+        this.loadLoans();
+      });
+    }
+  }
+
+  getStatusBadgeClass(status?: string): string {
+    switch (status) {
+      case 'aprobado': return 'badge-success';
+      case 'rechazado': return 'badge-danger';
+      case 'creado': return 'badge-warning';
+      case 'finalizado': return 'badge-secondary';
+      default: return 'badge-secondary';
+    }
+  }
+
+  getStatusText(status?: string): string {
+    switch (status) {
+      case 'aprobado': return 'Aprobado';
+      case 'rechazado': return 'Rechazado';
+      case 'creado': return 'Creado';
+      case 'finalizado': return 'Finalizado';
+      default: return 'Desconocido';
+    }
   }
 }

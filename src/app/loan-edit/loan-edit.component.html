@@ -12,7 +12,8 @@
                     <h2 class="card-title">{{ isNewLoan ? 'Nuevo Préstamo' : 'Editar Préstamo' }}</h2>
                 </header>
                 <div class="card-body">
-                    <div class="form-group row pb-3">
+                    <!-- Campo de usuario - solo visible para admin -->
+                    <div class="form-group row pb-3" *ngIf="isAdmin">
                         <label class="col-sm-3 control-label text-sm-end pt-2">Usuario</label>
                         <div class="col-sm-9">
                             <select id="user" name="user" class="form-control" [(ngModel)]="loan.user" title="Please select at least one user" required>
@@ -20,6 +21,15 @@
                             </select>
                         </div>
                     </div>
+                    
+                    <!-- Información de usuario - solo visible para no-admin -->
+                    <div class="form-group row pb-3" *ngIf="!isAdmin">
+                        <label class="col-sm-3 control-label text-sm-end pt-2">Usuario</label>
+                        <div class="col-sm-9">
+                            <input type="text" class="form-control" [value]="loan.user?.name || 'Cargando...'" disabled>
+                        </div>
+                    </div>
+                    
                     <div class="form-group row pb-3">
                         <label class="col-sm-3 control-label text-sm-end pt-2">Fecha de Inicio</label>
                         <div class="col-sm-9">
@@ -40,12 +50,24 @@
                             </select>
                         </div>
                     </div>
-                    <div class="form-group row pb-3">
+                    
+                    <!-- Campo de tarifa - solo visible para admin -->
+                    <div class="form-group row pb-3" *ngIf="isAdmin">
                         <label class="col-sm-3 control-label text-sm-end pt-2">Tarifa</label>
                         <div class="col-sm-9">
                             <select id="rate" class="form-control" name="rate" [(ngModel)]="loan.rate" title="Please select at least one user" required>
                                 <option *ngFor="let rate of rates" [ngValue]="rate">{{ rate.description + ' ($' + rate.value + ')'}}</option>
                             </select>
+                        </div>
+                    </div>
+                    
+                    <!-- Estado del préstamo (si existe) -->
+                    <div class="form-group row pb-3" *ngIf="!isNewLoan">
+                        <label class="col-sm-3 control-label text-sm-end pt-2">Estado</label>
+                        <div class="col-sm-9">
+                            <span [class]="'badge ' + (loan.status === 'aprobado' ? 'badge-success' : loan.status === 'rechazado' ? 'badge-danger' : loan.status === 'finalizado' ? 'badge-secondary' : 'badge-warning')">
+                                {{ loan.status === 'aprobado' ? 'Aprobado' : loan.status === 'rechazado' ? 'Rechazado' : loan.status === 'finalizado' ? 'Finalizado' : 'Creado' }}
+                            </span>
                         </div>
                     </div>
                 </div>

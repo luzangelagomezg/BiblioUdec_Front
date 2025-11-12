@@ -9,9 +9,10 @@ export interface Loan {
   loanDate: string,
   expirationDate: string,
   isActive: boolean,
+  status?: 'creado' | 'aprobado' | 'rechazado' | 'finalizado',
   books: Book[],
   user: User,
-  rate: Rate
+  rate?: Rate
 }
 
 @Injectable({
@@ -24,6 +25,10 @@ export class LoanService {
 
   getLoans() {
     return this.http.get<Loan[]>(this.apiUrl);
+  }
+
+  getLoansByUser(userId: string) {
+    return this.http.get<Loan[]>(`${this.apiUrl}/user/${userId}`);
   }
 
   getLoanById(id: string) {
@@ -56,4 +61,11 @@ export class LoanService {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
 
+  approveLoan(loanId: string, rateId: string) {
+    return this.http.post(`${this.apiUrl}/${loanId}/approve`, { rateId });
+  }
+
+  rejectLoan(loanId: string) {
+    return this.http.post(`${this.apiUrl}/${loanId}/reject`, {});
+  }
 }
