@@ -7,6 +7,7 @@ import { Rate, RateService } from '../services/rate.service';
 import { Loan, LoanService } from '../services/loan.service';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../services/auth.service';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-loan-edit',
@@ -124,42 +125,45 @@ export class LoanEditComponent implements OnInit {
     }
     
     if(!loan.id) {
+      // Crear nuevo préstamo
       this.loanService.createLoan(loanToSend).subscribe((newLoan: Loan) =>{
         console.log('loan creado');
         loan.id = newLoan.id;
-        this.loanService.associateBooksToLoan(loan.id,loan.books).subscribe(()=> {
-          console.log('libros asociados al prestamo');
-        })
-        this.loanService.associateUserToLoan(loan.id,loan.user).subscribe(()=>{
-          console.log('usuario asociado al prestamo');
-        })
+        
+        const associations = [
+          this.loanService.associateBooksToLoan(loan.id, loan.books),
+          this.loanService.associateUserToLoan(loan.id, loan.user)
+        ];
         
         // Solo asociar tarifa si es admin y tiene tarifa
         if (this.isAdmin && loan.rate?.id) {
-          this.loanService.associateRateToLoan(loan.id,loan.rate).subscribe(()=>{
-            console.log('tarifa asociada al prestamo');
-          })
+          associations.push(this.loanService.associateRateToLoan(loan.id, loan.rate));
         }
-        window.location.href = '/loans';
+        
+        forkJoin(associations).subscribe(() => {
+          console.log('Todas las asociaciones completadas');
+          window.location.href = '/loans';
+        });
       });
     } else {
-      this.loanService.updateLoan(loanToSend).subscribe((newLoan: Loan) =>{
+      // Actualizar préstamo existente
+      this.loanService.updateLoan(loanToSend).subscribe((updatedLoan: Loan) =>{
         console.log('loan actualizado');
-        loan.id = newLoan.id;
-        this.loanService.associateBooksToLoan(loan.id,loan.books).subscribe(()=> {
-          console.log('libros asociados al prestamo');
-        })
-        this.loanService.associateUserToLoan(loan.id,loan.user).subscribe(()=>{
-          console.log('usuario asociado al prestamo');
-        })
+        
+        const associations = [
+          this.loanService.associateBooksToLoan(loan.id, loan.books),
+          this.loanService.associateUserToLoan(loan.id, loan.user)
+        ];
         
         // Solo asociar tarifa si es admin y tiene tarifa
         if (this.isAdmin && loan.rate?.id) {
-          this.loanService.associateRateToLoan(loan.id,loan.rate).subscribe(()=>{
-            console.log('tarifa asociada al prestamo');
-          })
+          associations.push(this.loanService.associateRateToLoan(loan.id, loan.rate));
         }
-        window.location.href = '/loans';
+        
+        forkJoin(associations).subscribe(() => {
+          console.log('Todas las asociaciones completadas');
+          window.location.href = '/loans';
+        });
       });
     }
   }
