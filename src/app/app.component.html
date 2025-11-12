@@ -1,4 +1,5 @@
-<section class="body" *ngIf="currentUser">
+<!-- Layout con sidebar y header (solo si está autenticado Y no está en login) -->
+<section class="body" *ngIf="currentUser && !isLoginPage">
   <header class="header">
     <div class="logo-container">
       <a href="#" class="logo">
@@ -129,4 +130,4 @@
 </section>
 
 <!-- Vista sin layout para login y páginas públicas -->
-<router-outlet *ngIf="!currentUser"></router-outlet>
+<router-outlet *ngIf="!currentUser || isLoginPage"></router-outlet>

@@ -15,6 +15,7 @@ export class AppComponent {
   title = '';
   breadcrumbs: string[] = [];
   currentUser: DecodedToken | null = null;
+  isLoginPage: boolean = false;
 
   constructor(
     private router: Router, 
@@ -35,6 +36,13 @@ export class AppComponent {
       .subscribe(data => {
         this.title = data['title'] || 'bibloteca UDEC';
         this.breadcrumbs = data['breadcrumbs'] || [];
+      });
+
+    // Detectar si está en página de login
+    this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe((event: any) => {
+        this.isLoginPage = event.url.includes('/login');
       });
 
     // Suscribirse al usuario actual
